@@ -13,11 +13,8 @@ exports.Routers = class Routers {
 
         this.server.register(require('fastify-cors'), {
             origin: (origin, cb) => {
-                if (/localhost/.test(origin)) {
-                    cb(null, true)
-                    return
-                }
-                cb(new Error("Not allowed"))
+                cb(null, true)
+                return
             }
         })
     }
@@ -28,6 +25,7 @@ exports.Routers = class Routers {
 
     handle() {
         this.server.post('/register', this.auth.register.bind(this.auth))
+        this.server.post('/login', this.auth.login.bind(this.auth))
     }
 
     listen() {

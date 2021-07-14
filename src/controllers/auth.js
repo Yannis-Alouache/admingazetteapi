@@ -23,7 +23,7 @@ exports.Auth = class Auth {
 
         const permissions = []
         const active = true
-        const tmp = ""
+        const tmp = "626265115151747841511"
 
         if (!email) {
             return {
@@ -151,6 +151,105 @@ exports.Auth = class Auth {
         return {
             status: "success",
             token
+        }
+    }
+
+    async forgot(req, res) {
+        const {
+            email
+        } = req.body
+
+        if (!email) {
+            return {
+                status: "error",
+                message: "Merci de spécifier votre email"
+            }
+        }
+
+        const user = await this.users.findOne({ email })
+
+        if (!user) {
+            return {
+                status: "error",
+                message: "Merci de vous inscrires"
+            }
+        }
+
+        const tmp = Math.floor(Math.random() * (500 - 10 + 1)) + 10;
+
+        Promise.all([
+            this.users.updateOne({
+                "email": email
+            }, {
+                $set: {
+                    "tmp": tmp
+                }
+            }, {
+                upsert: true
+            }),
+            this.mail.send(email, "Mot de passe oublié", `<h1> Mot de passe oubliée </h1> <br> <p> ${tmp} </p>`)
+        ])
+
+        return {
+            status: "success",
+            message: "Vous venez de recevoir un code de vérification par mail"
+        }
+    }
+
+    async recovery(req, res) {
+        const {
+            tmp,
+            email,
+            password
+        } = req.body
+
+        if (!tmp) {
+            return {
+                status: "error",
+                message: "Merci de renseigner votre code de vérification"
+            }
+        }
+
+        if (!email) {
+            return {
+                status: "error",
+                message: "Merci de renseigner votre email"
+            }
+        }
+
+        if (!password) {
+            return {
+                status: "error",
+                message: "Merci de renseigner votre mot de passe"
+            }
+        }
+
+        const user = await this.users.findOne({ email })
+
+        if (tmp != user.tmp) {
+            return {
+                status: "error",
+                message: "Mauvais code de vérification"
+            }
+        }
+
+        Promise.all([
+            this.users.updateOne({
+                "email": email
+            }, {
+                $set: {
+                    "tmp": "",
+                    "password": (await argon2.hash(password))
+                }
+            }, {
+                upsert: true
+            }),
+            this.mail.send(email, "Changement de mot de passe", "Vous venez de faire un changement de mot de passe, si ce n'est pas vous, signalez le au superadmin !")
+        ])
+
+        return {
+            status: "success",
+            message: "Mot de passe changé"
         }
     }
 }

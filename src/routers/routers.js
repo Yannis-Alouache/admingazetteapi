@@ -26,6 +26,10 @@ exports.Routers = class Routers {
     handle() {
         this.server.post('/register', this.auth.register.bind(this.auth))
         this.server.post('/login', this.auth.login.bind(this.auth))
+        this.server.post('/forgot', this.auth.forgot.bind(this.auth))
+        this.server.post('/recovery', this.auth.recovery.bind(this.auth))
+
+
     }
 
     listen() {

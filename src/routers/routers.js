@@ -34,6 +34,7 @@ exports.Routers = class Routers {
 
         this.server.post('/api/user/change', this.user.change.bind(this.user))
         this.server.post('/api/user/delete', this.user.delete.bind(this.user))
+        this.server.post('/api/user/get', this.user.get.bind(this.user))
     }
 
     listen() {

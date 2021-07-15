@@ -173,4 +173,78 @@ exports.User = class User {
             }
         }
     }
+
+    async get(req, res) {
+        const {
+            token,
+            email
+        } = req.body
+
+        if (!token) {
+            return {
+                status: "error",
+                message: "Merci de vous connectez"
+            }
+        }
+
+        try {
+            const decoded = await jwt.verify(token, (await this.env.get("SECRET")))
+
+            if (email === decoded.email || !email) {
+                const {
+                    firstname,
+                    lastname,
+                    email,
+                    zipcode,
+                    address,
+                    contacts,
+                    enterprise
+                } = await this.users.findOne({ email: decoded.email })
+                return {
+                    status: "success",
+                    data: {
+                        firstname,
+                        lastname,
+                        email,
+                        zipcode,
+                        address,
+                        contacts,
+                        enterprise
+                    }
+                }
+            }
+
+            const [user, me] = await Promise.all([
+                this.users.findOne({ email }),
+                this.users.findOne({ email: decoded.email })
+            ])
+
+            for (const permission of me.permissions) {
+                if (permission === "GET_USER_INFORMATION") {
+                    return {
+                        status: "success",
+                        data: {
+                            firstname: user.firstname,
+                            lastname: user.lastname,
+                            email: user.email,
+                            zipcode: user.zipcode,
+                            address: user.address,
+                            contacts: user.contacts,
+                            enterprise: user.enterprise
+                        }
+                    }
+                }
+            }
+
+            return {
+                status: "error",
+                message: "Vous n'avez pas la permission"
+            }
+        } catch (e) {
+            return {
+                status: "error",
+                message: e
+            }
+        }
+    }
 }

@@ -1,4 +1,5 @@
 const fastify = require('fastify')
+const {Permission} = require("../controllers/permission");
 const {Pub} = require("../controllers/pub");
 const {User} = require("../controllers/user");
 const {
@@ -23,6 +24,7 @@ exports.Routers = class Routers {
     async init(db, mail) {
         this.auth = new Auth(db, mail)
         this.user = new User(db, mail)
+        this.perm = new Permission(db, mail)
         this.pub  = new Pub(db, mail)
     }
 
@@ -35,6 +37,8 @@ exports.Routers = class Routers {
         this.server.post('/api/user/change', this.user.change.bind(this.user))
         this.server.post('/api/user/delete', this.user.delete.bind(this.user))
         this.server.post('/api/user/get', this.user.get.bind(this.user))
+
+        this.server.post('/api/perm/add', this.perm.add.bind(this.perm))
     }
 
     listen() {

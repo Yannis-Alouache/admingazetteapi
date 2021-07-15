@@ -199,6 +199,66 @@ exports.Permission = class Permission {
             email
         } = req.body
 
+        if (!token) {
+            return {
+                status: "error",
+                message: "Merci de vous connectez"
+            }
+        }
 
+        if (!email) {
+            return {
+                status: "error",
+                message: "Merci de spécifiez votre email"
+            }
+        }
+
+        try {
+            const decoded = await jwt.verify(token, (await this.env.get("SECRET")))
+
+            if (decoded.email === email || !email) {
+                const user = await this.users.findOne({ email: decoded.email })
+
+                for (const p of user.permissions) {
+                    if (p === "GET_PERMISSION") {
+                        return {
+                            status: "success",
+                            data: {
+                                permissions: user.permissions
+                            }
+                        }
+                    }
+                }
+            } else {
+                const [
+                    me,
+                    user
+                ] = await Promise.all([
+                    this.users.findOne({ email: decoded.email }),
+                    this.users.findOne({ email })
+                ])
+
+                for (const p of me.permissions) {
+                    if (p === "GET_PERMISSION") {
+                        return {
+                            status: "success",
+                            data: {
+                                permissions: user.permissions
+                            }
+                        }
+                    }
+                }
+            }
+
+            return {
+                status: "error",
+                message: "Vous n'avez pas la permission !"
+            }
+        } catch (e) {
+            return {
+                status: "error",
+                message: e
+            }
+        }
     }
 }

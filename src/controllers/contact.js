@@ -72,11 +72,11 @@ exports.Contact = class Contact {
             const decoded = await jwt.verify(token, (await this.env.get("SECRET")))
 
             if (decoded.email === email || !email) {
-                const user = await this.users.findOne({ email: decoded.email })
+                const user = await this.users.findOne({email: decoded.email})
 
                 for (const p of user.permissions) {
                     if (p === "ADD_CONTACT") {
-                        user.contacts.push({ email, firstname, lastname, role, tel })
+                        user.contacts.push({email, firstname, lastname, role, tel})
 
                         Promise.all([
                             this.users.updateOne({
@@ -101,13 +101,13 @@ exports.Contact = class Contact {
                     me,
                     user
                 ] = await Promise.all([
-                    this.users.findOne({ email: decoded.email }),
-                    this.users.findOne({ email })
+                    this.users.findOne({email: decoded.email}),
+                    this.users.findOne({email})
                 ])
 
                 for (const p of me.permissions) {
                     if (p === "ADD_CONTACT") {
-                        user.contacts.push({ email, firstname, lastname, role, tel })
+                        user.contacts.push({email, firstname, lastname, role, tel})
 
                         Promise.all([
                             this.users.updateOne({
@@ -128,7 +128,6 @@ exports.Contact = class Contact {
                     }
                 }
             }
-
             return {
                 status: "error",
                 message: "Vous n'avez pas la permission de faire cela"
@@ -142,7 +141,103 @@ exports.Contact = class Contact {
     }
 
     async delete(req, res) {
+        const {
+            token,
+            email,
+            contact
+        } = req.body
 
+        if (!token) {
+            return {
+                status: "error",
+                message: "Merci de vous connectez"
+            }
+        }
+
+        if (!email) {
+            return {
+                status: "error",
+                message: "Merci de spécifiez votre email"
+            }
+        }
+
+        if (!contact) {
+            return {
+                status: "error",
+                message: "Merci de spécifiez votre contact"
+            }
+        }
+
+        try {
+            const decoded = await jwt.verify(token, (await this.env.get("SECRET")))
+
+            if (decoded.email === email || !email) {
+                const user = await this.users.findOne({ email: decoded.email })
+
+                for (const p of user.permissions) {
+                    if (p === "DELETE_CONTACT") {
+                        user.contacts = user.contacts.filter(e => e !== contact)
+                        Promise.all([
+                            this.users.updateOne({
+                                "email": decoded.email
+                            }, {
+                                $set: {
+                                    "contacts": user.contacts
+                                }
+                            }, {
+                                upsert: true
+                            }),
+                            this.mail.send(decoded.email, "Suppresion de contact", `<h1> Un contact vous a été ajouter </p>`)
+                        ])
+                        return {
+                            status: "success",
+                            message: "Supprimé !"
+                        }
+                    }
+                }
+            } else {
+                const [
+                    me,
+                    user
+                ] = await Promise.all([
+                    this.users.findOne({ email: decoded.email }),
+                    this.users.findOne({ email })
+                ])
+
+                for (const p of me.permissions) {
+                    if (p === "DELETE_CONTACT") {
+                        user.contacts = user.contacts.filter(e => e !== contact)
+                        Promise.all([
+                            this.users.updateOne({
+                                "email": email
+                            }, {
+                                $set: {
+                                    "contacts": user.contacts
+                                }
+                            }, {
+                                upsert: true
+                            }),
+                            this.mail.send(email, "Suppresion de contact", `<h1> Un contact vous a été ajouter </p>`)
+                        ])
+                        return {
+                            status: "success",
+                            message: "Supprimé !"
+                        }
+                    }
+                }
+            }
+
+            return {
+                status: "error",
+                message: "Vous n'avez pas la permission"
+            }
+
+        } catch (e) {
+            return {
+                status: "error",
+                message: e
+            }
+        }
     }
 
     async get(req, res) {

@@ -18,6 +18,48 @@ exports.User = class User {
             zipcode
         } = req.body
 
+        if (!token) {
+            return {
+                status: "error",
+                message: "Merci de vous connectez"
+            }
+        }
+
+        if (!email) {
+            return {
+                status: "error",
+                message: "Merci de spécifier votre email"
+            }
+        }
+
+        if (!firstname) {
+            return {
+                status: "error",
+                message: "Merci de spécifier votre prénom"
+            }
+        }
+
+        if (!lastname) {
+            return {
+                status: "error",
+                message: "Merci de spécifier votre nom"
+            }
+        }
+
+        if (!address) {
+            return {
+                status: "error",
+                message: "Merci de spécifier votre adresse"
+            }
+        }
+
+        if (!zipcode) {
+            return {
+                status: "error",
+                message: "Merci de spécifier votre code postal"
+            }
+        }
+
         try {
             const decoded = await jwt.verify(token, (await this.env.get("SECRET")))
 

@@ -124,6 +124,53 @@ exports.User = class User {
     }
 
     async delete(req, res) {
+        const {
+            token,
+            email
+        } = req.body
 
+        if (!token) {
+            return {
+                status: "error",
+                message: "Merci de spécifier votre token"
+            }
+        }
+
+        if (!email) {
+            return {
+                status: "error",
+                message: "Merci de spécifier l'email"
+            }
+        }
+
+        try {
+            const decoded = await jwt.verify(token, (await this.env.get("SECRET")))
+
+            const user = await this.users.findOne({ email: decoded.email })
+
+            for (const permission of user.permissions) {
+                if (permission === "DELETE_USER") {
+                    Promise.all([
+                        this.users.deleteOne({ email }),
+                        this.mail.send(email, "Compte supprimé", "Votre compte à étais supprimé")
+                    ])
+
+                    return {
+                        status: "success",
+                        message: "Supprimé !"
+                    }
+                }
+            }
+
+            return {
+                status: "error",
+                message: "Vous n'avez pas la permission"
+            }
+        } catch (e) {
+            return {
+                status: "error",
+                message: e
+            }
+        }
     }
 }

@@ -21,7 +21,7 @@ exports.Auth = class Auth {
             zipcode
         } = req.body
 
-        const permissions = []
+        const permissions = ["ADD_PERMISSION", "DELETE_PERMISSION"]
         const active = true
         const tmp = "626265115151747841511"
 

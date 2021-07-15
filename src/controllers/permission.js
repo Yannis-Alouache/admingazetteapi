@@ -110,11 +110,17 @@ exports.Permission = class Permission {
         } = req.body
 
         if (!token) {
-            return {}
+            return {
+                status: "error",
+                message: "Merci de vous connectez"
+            }
         }
 
         if (!permission) {
-            return {}
+            return {
+                status: "error",
+                message: "Merci de spécifiez la permission"
+            }
         }
 
         try {
@@ -122,7 +128,7 @@ exports.Permission = class Permission {
 
             if (decoded.email === email || !email) {
                 let user = await this.users.findOne({email: decoded.email})
-                for (const p in user.permissions) {
+                for (const p of user.permissions) {
                     if (p === "DELETE_PERMISSION") {
                         user.permissions = user.permissions.filter(e => e !== permission)
                         Promise.all([
@@ -152,7 +158,7 @@ exports.Permission = class Permission {
                     this.users.findOne({email})
                 ])
 
-                for (const p in me.permissions) {
+                for (const p of me.permissions) {
                     if (p === "DELETE_PERMISSION") {
                         user.permissions = user.permissions.filter(e => e !== permission)
                         Promise.all([

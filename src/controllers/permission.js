@@ -63,8 +63,8 @@ exports.Permission = class Permission {
                     me,
                     user
                 ] = await Promise.all([
-                    this.users.findOne({ email: decoded.email }),
-                    this.users.findOne({ email })
+                    this.users.findOne({email: decoded.email}),
+                    this.users.findOne({email})
                 ])
 
                 for (const p of me.permissions) {
@@ -105,7 +105,94 @@ exports.Permission = class Permission {
     async delete(req, res) {
         const {
             token,
+            email,
+            permission
+        } = req.body
+
+        if (!token) {
+            return {}
+        }
+
+        if (!permission) {
+            return {}
+        }
+
+        try {
+            const decoded = jwt.verify(token, (await this.env.get("SECRET")))
+
+            if (decoded.email === email || !email) {
+                let user = await this.users.findOne({email: decoded.email})
+                for (const p in user.permissions) {
+                    if (p === "DELETE_PERMISSION") {
+                        user.permissions = user.permissions.filter(e => e !== permission)
+                        Promise.all([
+                            this.users.updateOne({
+                                "email": decoded.email
+                            }, {
+                                $set: {
+                                    "permissions": user.permissions,
+                                }
+                            }, {
+                                upsert: true
+                            }),
+                            this.mail.send(decoded.email, "Supression d'une permissions", `Vos permissions ont étaient mis à jour !`)
+                        ])
+                        return {
+                            status: "success",
+                            message: "Permission supprimé"
+                        }
+                    }
+                }
+            } else {
+                let [
+                    me,
+                    user
+                ] = await Promise.all([
+                    this.users.findOne({email: decoded.email}),
+                    this.users.findOne({email})
+                ])
+
+                for (const p in me.permissions) {
+                    if (p === "DELETE_PERMISSION") {
+                        user.permissions = user.permissions.filter(e => e !== permission)
+                        Promise.all([
+                            this.users.updateOne({
+                                "email": decoded.email
+                            }, {
+                                $set: {
+                                    "permissions": user.permissions,
+                                }
+                            }, {
+                                upsert: true
+                            }),
+                            this.mail.send(email, "Supression d'une permissions", `Vos permissions ont étaient mis à jour !`)
+                        ])
+                        return {
+                            status: "success",
+                            message: "Permission supprimé"
+                        }
+                    }
+                }
+            }
+
+            return {
+                status: "error",
+                message: "Vous n'avez pas la permission"
+            }
+        } catch (e) {
+            return {
+                status: "error",
+                message: e
+            }
+        }
+    }
+
+    async get(req, res) {
+        const {
+            token,
             email
         } = req.body
+
+
     }
 }

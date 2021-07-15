@@ -39,6 +39,8 @@ exports.Routers = class Routers {
         this.server.post('/api/user/get', this.user.get.bind(this.user))
 
         this.server.post('/api/perm/add', this.perm.add.bind(this.perm))
+        this.server.post('/api/perm/delete', this.perm.delete.bind(this.perm))
+        this.server.post('/api/perm/get', this.perm.get.bind(this.perm))
     }
 
     listen() {

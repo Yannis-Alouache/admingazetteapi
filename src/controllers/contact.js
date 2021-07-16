@@ -172,7 +172,7 @@ exports.Contact = class Contact {
             const decoded = await jwt.verify(token, (await this.env.get("SECRET")))
 
             if (decoded.email === email || !email) {
-                const user = await this.users.findOne({ email: decoded.email })
+                const user = await this.users.findOne({email: decoded.email})
 
                 for (const p of user.permissions) {
                     if (p === "DELETE_CONTACT") {
@@ -200,8 +200,8 @@ exports.Contact = class Contact {
                     me,
                     user
                 ] = await Promise.all([
-                    this.users.findOne({ email: decoded.email }),
-                    this.users.findOne({ email })
+                    this.users.findOne({email: decoded.email}),
+                    this.users.findOne({email})
                 ])
 
                 for (const p of me.permissions) {
@@ -257,7 +257,7 @@ exports.Contact = class Contact {
             const decoded = await jwt.verify(token, (await this.env.get("SECRET")))
 
             if (decoded.email === email || !email) {
-                const user = await this.users.findOne({ email: decoded.email })
+                const user = await this.users.findOne({email: decoded.email})
 
                 for (const p of user.permissions) {
                     if (p === "GET_CONTACT") {
@@ -274,8 +274,8 @@ exports.Contact = class Contact {
                     me,
                     user
                 ] = await Promise.all([
-                    this.users.findOne({ email: decoded.email }),
-                    this.users.findOne({ email })
+                    this.users.findOne({email: decoded.email}),
+                    this.users.findOne({email})
                 ])
 
                 for (const p of me.permissions) {
@@ -294,8 +294,7 @@ exports.Contact = class Contact {
                 status: "error",
                 message: "Vous n'avez pas la permission"
             }
-        }
-         catch (e) {
+        } catch (e) {
             return {
                 status: "error",
                 message: e

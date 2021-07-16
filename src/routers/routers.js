@@ -20,14 +20,16 @@ exports.Routers = class Routers {
                 cb(null, true)
             }
         })
+
+        this.server.register(require('fastify-file-upload'))
     }
 
     async init(db, mail) {
-        this.auth = new Auth(db, mail)
-        this.user = new User(db, mail)
-        this.perm = new Permission(db, mail)
+        this.auth    = new Auth(db, mail)
+        this.user    = new User(db, mail)
+        this.perm    = new Permission(db, mail)
         this.contact = new Contact(db, mail)
-        this.pub  = new Pub(db, mail)
+        this.pub     = new Pub(db, mail)
     }
 
     handle() {
@@ -47,6 +49,10 @@ exports.Routers = class Routers {
         this.server.post('/api/contact/add', this.contact.add.bind(this.contact))
         this.server.post('/api/contact/delete', this.contact.delete.bind(this.contact))
         this.server.post('/api/contact/get', this.contact.get.bind(this.contact))
+
+        this.server.post('/api/pub/create', this.pub.create.bind(this.pub))
+        this.server.post('/api/pub/delete', this.pub.delete.bind(this.pub))
+        this.server.post('/api/pub/get', this.pub.get.bind(this.pub))
     }
 
     listen() {

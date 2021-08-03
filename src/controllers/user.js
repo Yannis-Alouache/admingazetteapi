@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const {Env} = require("../env/env");
+const { ResponseType, PermissionType } = require("../utils/type")
 
 exports.User = class User {
     constructor(db, mail) {
@@ -21,42 +22,42 @@ exports.User = class User {
         if (!token) {
             return {
                 status: "error",
-                message: "Merci de vous connectez"
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!email) {
             return {
                 status: "error",
-                message: "Merci de spécifier votre email"
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!firstname) {
             return {
                 status: "error",
-                message: "Merci de spécifier votre prénom"
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!lastname) {
             return {
                 status: "error",
-                message: "Merci de spécifier votre nom"
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!address) {
             return {
                 status: "error",
-                message: "Merci de spécifier votre adresse"
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!zipcode) {
             return {
                 status: "error",
-                message: "Merci de spécifier votre code postal"
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
@@ -81,14 +82,14 @@ exports.User = class User {
                 ])
                 return {
                     status: "success",
-                    message: "Mis à jour !"
+                    type: ResponseType.SUCCESS
                 }
             }
 
             const user = await this.users.findOne({ email: decoded.email })
 
             for (const permission of user.permissions) {
-                if (permission === "CHANGE_INFORMATION") {
+                if (permission === PermissionType.CHANGE_INFORMATION) {
                     Promise.all([
                         this.users.updateOne({
                             "email": email
@@ -106,19 +107,19 @@ exports.User = class User {
                     ])
                     return {
                         status: "success",
-                        message: "Mis à jour !"
+                        type: ResponseType.SUCCESS
                     }
                 }
             }
 
             return {
                 status: "error",
-                message: "Vous n'avez pas la permission de faire cela"
+                type: ResponseType.PERMISSION_ERROR
             }
         } catch (e) {
             return {
                 status: "error",
-                message: e
+                type: ResponseType.ERROR
             }
         }
     }
@@ -132,14 +133,14 @@ exports.User = class User {
         if (!token) {
             return {
                 status: "error",
-                message: "Merci de spécifier votre token"
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!email) {
             return {
                 status: "error",
-                message: "Merci de spécifier l'email"
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
@@ -149,7 +150,7 @@ exports.User = class User {
             const user = await this.users.findOne({ email: decoded.email })
 
             for (const permission of user.permissions) {
-                if (permission === "DELETE_USER") {
+                if (permission === PermissionType.DELETE_USER) {
                     Promise.all([
                         this.users.deleteOne({ email }),
                         this.mail.send(email, "Compte supprimé", "Votre compte à étais supprimé")
@@ -157,19 +158,19 @@ exports.User = class User {
 
                     return {
                         status: "success",
-                        message: "Supprimé !"
+                        type: ResponseType.SUCCESS 
                     }
                 }
             }
 
             return {
                 status: "error",
-                message: "Vous n'avez pas la permission"
+                type: ResponseType.PERMISSION_ERROR
             }
         } catch (e) {
             return {
                 status: "error",
-                message: e
+                type: ResponseType.ERROR
             }
         }
     }
@@ -183,7 +184,7 @@ exports.User = class User {
         if (!token) {
             return {
                 status: "error",
-                message: "Merci de vous connectez"
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
@@ -202,6 +203,7 @@ exports.User = class User {
                 } = await this.users.findOne({ email: decoded.email })
                 return {
                     status: "success",
+                    type: ResponseType.SUCCESS, 
                     data: {
                         firstname,
                         lastname,
@@ -220,9 +222,10 @@ exports.User = class User {
             ])
 
             for (const permission of me.permissions) {
-                if (permission === "GET_USER_INFORMATION") {
+                if (permission === PermissionType.GET_USER_INFORMATION) {
                     return {
                         status: "success",
+                        type: ResponseType.SUCCESS, 
                         data: {
                             firstname: user.firstname,
                             lastname: user.lastname,
@@ -238,12 +241,12 @@ exports.User = class User {
 
             return {
                 status: "error",
-                message: "Vous n'avez pas la permission"
+                type: ResponseType.PERMISSION_ERROR
             }
         } catch (e) {
             return {
                 status: "error",
-                message: e
+                type: ResponseType.ERROR 
             }
         }
     }

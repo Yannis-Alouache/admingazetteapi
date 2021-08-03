@@ -1,5 +1,6 @@
 const {Env} = require("../env/env");
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken') 
+const { ResponseType, PermissionType } = require("../utils/type")
 
 exports.Contact = class Contact {
     constructor(db, mail) {
@@ -22,49 +23,49 @@ exports.Contact = class Contact {
         if (!token) {
             return {
                 status: "error",
-                message: "Merci de vous connectez"
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!userEmail) {
             return {
                 status: "error",
-                message: "Merci de renseigner le mail de l'utilisateur"
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!email) {
             return {
                 status: "error",
-                message: "Merci de renseigner le mail du contact"
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!firstname) {
             return {
                 status: "error",
-                message: "Merci de renseigner le prénom du contact"
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!lastname) {
             return {
                 status: "error",
-                message: "Merci de renseigner le nom du contact"
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!role) {
             return {
                 status: "error",
-                message: "Merci de renseigner la fonction du contact"
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!tel) {
             return {
                 status: "error",
-                message: "Merci de renseigner le téléphone du contact"
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
@@ -75,7 +76,7 @@ exports.Contact = class Contact {
                 const user = await this.users.findOne({email: decoded.email})
 
                 for (const p of user.permissions) {
-                    if (p === "ADD_CONTACT") {
+                    if (p === PermissionType.ADD_CONTACT) {
                         user.contacts.push({email, firstname, lastname, role, tel})
 
                         Promise.all([
@@ -92,7 +93,7 @@ exports.Contact = class Contact {
                         ])
                         return {
                             status: "success",
-                            message: "Ajout !"
+                            type: ResponseType.SUCCESS
                         }
                     }
                 }
@@ -106,7 +107,7 @@ exports.Contact = class Contact {
                 ])
 
                 for (const p of me.permissions) {
-                    if (p === "ADD_CONTACT") {
+                    if (p === PermissionType.ADD_CONTACT) {
                         user.contacts.push({email, firstname, lastname, role, tel})
 
                         Promise.all([
@@ -123,19 +124,19 @@ exports.Contact = class Contact {
                         ])
                         return {
                             status: "success",
-                            message: "Ajout !"
+                            type: ResponseType.SUCCESS
                         }
                     }
                 }
             }
             return {
                 status: "error",
-                message: "Vous n'avez pas la permission de faire cela"
+                type: ResponseType.PERMISSION_ERROR
             }
         } catch (e) {
             return {
                 status: "error",
-                message: e
+                type: ResponseType.ERROR
             }
         }
     }
@@ -150,21 +151,21 @@ exports.Contact = class Contact {
         if (!token) {
             return {
                 status: "error",
-                message: "Merci de vous connectez"
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!email) {
             return {
                 status: "error",
-                message: "Merci de spécifiez votre email"
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!contact) {
             return {
                 status: "error",
-                message: "Merci de spécifiez votre contact"
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
@@ -175,7 +176,7 @@ exports.Contact = class Contact {
                 const user = await this.users.findOne({email: decoded.email})
 
                 for (const p of user.permissions) {
-                    if (p === "DELETE_CONTACT") {
+                    if (p === PermissionType.DELETE_CONTACT) {
                         user.contacts = user.contacts.filter(e => e !== contact)
                         Promise.all([
                             this.users.updateOne({
@@ -191,7 +192,7 @@ exports.Contact = class Contact {
                         ])
                         return {
                             status: "success",
-                            message: "Supprimé !"
+                            type: ResponseType.SUCCESS
                         }
                     }
                 }
@@ -205,7 +206,7 @@ exports.Contact = class Contact {
                 ])
 
                 for (const p of me.permissions) {
-                    if (p === "DELETE_CONTACT") {
+                    if (p === PermissionType.DELETE_CONTACT) {
                         user.contacts = user.contacts.filter(e => e !== contact)
                         Promise.all([
                             this.users.updateOne({
@@ -221,7 +222,7 @@ exports.Contact = class Contact {
                         ])
                         return {
                             status: "success",
-                            message: "Supprimé !"
+                            type: ResponseType.SUCCESS
                         }
                     }
                 }
@@ -229,13 +230,13 @@ exports.Contact = class Contact {
 
             return {
                 status: "error",
-                message: "Vous n'avez pas la permission"
+                type: ResponseType.PERMISSION_ERROR
             }
 
         } catch (e) {
             return {
                 status: "error",
-                message: e
+                message: ResponseType.ERROR
             }
         }
     }
@@ -249,7 +250,7 @@ exports.Contact = class Contact {
         if (!token) {
             return {
                 status: "error",
-                message: "Merci de vous connectez !"
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
@@ -260,9 +261,10 @@ exports.Contact = class Contact {
                 const user = await this.users.findOne({email: decoded.email})
 
                 for (const p of user.permissions) {
-                    if (p === "GET_CONTACT") {
+                    if (p === PermissionType.GET_CONTACT) {
                         return {
                             status: "success",
+                            type: ResponseType.SUCCESS, 
                             data: {
                                 contacts: user.contacts
                             }
@@ -279,9 +281,10 @@ exports.Contact = class Contact {
                 ])
 
                 for (const p of me.permissions) {
-                    if (p === "GET_CONTACT") {
+                    if (p === PermissionType.SUCCESS) {
                         return {
                             status: "success",
+                            type: ResponseType.SUCCESS,
                             data: {
                                 contacts: user.contacts
                             }
@@ -292,12 +295,12 @@ exports.Contact = class Contact {
 
             return {
                 status: "error",
-                message: "Vous n'avez pas la permission"
+                type: ResponseType.PERMISSION_ERROR 
             }
         } catch (e) {
             return {
                 status: "error",
-                message: e
+                type: ResponseType.ERROR
             }
         }
     }

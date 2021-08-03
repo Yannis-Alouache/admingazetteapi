@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const argon2 = require('argon2')
-const {Env} = require("../env/env");
+const {Env} = require("../env/env"); 
+const { ResponseType } = require("../utils/type")
 
 exports.Auth = class Auth {
     constructor(db, mail) {
@@ -21,63 +22,63 @@ exports.Auth = class Auth {
             zipcode
         } = req.body
 
-        const permissions = ["ADD_PERMISSION", "DELETE_PERMISSION"]
+        const permissions = []
         const active = true
         const tmp = "626265115151747841511"
 
         if (!email) {
             return {
                 status: "error",
-                message: "Merci de renseigner votre email"
+                type: ResponseType.MISMATCH_FIELD 
             }
         }
 
         if (!firstname) {
             return {
                 status: "error",
-                message: "Merci de renseigner votre prénom"
+                type: ResponseType.MISMATCH_FIELD 
             }
         }
 
         if (!lastname) {
             return {
                 status: "error",
-                message: "Merci de renseigner votre nom"
+                type: ResponseType.MISMATCH_FIELD 
             }
         }
 
         if (!password) {
             return {
                 status: "error",
-                message: "Merci de renseigner votre mot de passe"
+                type: ResponseType.MISMATCH_FIELD 
             }
         }
 
         if (!enterprise) {
             return {
                 status: "error",
-                message: "Merci de renseigner le nom de votre entreprise"
+                type: ResponseType.MISMATCH_FIELD 
             }
         }
 
         if (!contacts) {
             return {
                 status: "error",
-                message: "Merci de renseigner vos contacts"
+                type: ResponseType.MISMATCH_FIELD 
             }
         }
 
         if (!address) {
             return {
                 status: "error",
-                message: "Merci de renseigner votre adresse"
+                type: ResponseType.MISMATCH_FIELD 
             }
         }
 
         if (!zipcode) {
             return {
                 status: "error",
-                message: "Merci de renseigner votre code postal"
+                type: ResponseType.MISMATCH_FIELD 
             }
         }
 
@@ -86,7 +87,7 @@ exports.Auth = class Auth {
         if (userExist) {
             return {
                 status: "error",
-                message: "Vous êtes déjà inscrit !"
+                type: ResponseType.USER_EXIST
             }
         }
 
@@ -109,7 +110,7 @@ exports.Auth = class Auth {
 
         return {
             status: "success",
-            message: "Inscription réussis !"
+            type: ResponseType.SUCCESS
         }
     }
 
@@ -122,14 +123,14 @@ exports.Auth = class Auth {
         if (!email) {
             return {
                 status: "error",
-                message: "Merci de renseigner votre email"
+                type: ResponseType.MISMATCH_FIELD 
             }
         }
 
         if (!password) {
             return {
                 status: "error",
-                message: "Merci de renseigner votre mot de passe"
+                type: ResponseType.MISMATCH_FIELD 
             }
         }
 
@@ -140,7 +141,7 @@ exports.Auth = class Auth {
         if (!match) {
             return {
                 status: "error",
-                message: "Mot de passe incorrecte"
+                type: ResponseType.PASSWORD_ERROR 
             }
         }
 
@@ -150,6 +151,7 @@ exports.Auth = class Auth {
 
         return {
             status: "success",
+            type: ResponseType.SUCCESS,
             token
         }
     }
@@ -162,7 +164,7 @@ exports.Auth = class Auth {
         if (!email) {
             return {
                 status: "error",
-                message: "Merci de spécifier votre email"
+                type: ResponseType.MISMATCH_FIELD 
             }
         }
 
@@ -171,7 +173,7 @@ exports.Auth = class Auth {
         if (!user) {
             return {
                 status: "error",
-                message: "Merci de vous inscrires"
+                type: ResponseType.USER_NOT_EXIST 
             }
         }
 
@@ -192,7 +194,7 @@ exports.Auth = class Auth {
 
         return {
             status: "success",
-            message: "Vous venez de recevoir un code de vérification par mail"
+            type: ResponseType.SUCCESS
         }
     }
 
@@ -206,21 +208,21 @@ exports.Auth = class Auth {
         if (!tmp) {
             return {
                 status: "error",
-                message: "Merci de renseigner votre code de vérification"
+                type: ResponseType.MISMATCH_FIELD 
             }
         }
 
         if (!email) {
             return {
                 status: "error",
-                message: "Merci de renseigner votre email"
+                type: ResponseType.MISMATCH_FIELD 
             }
         }
 
         if (!password) {
             return {
                 status: "error",
-                message: "Merci de renseigner votre mot de passe"
+                type: ResponseType.MISMATCH_FIELD 
             }
         }
 
@@ -229,7 +231,7 @@ exports.Auth = class Auth {
         if (tmp != user.tmp) {
             return {
                 status: "error",
-                message: "Mauvais code de vérification"
+                type: ResponseType.TMP_ERROR 
             }
         }
 
@@ -249,7 +251,7 @@ exports.Auth = class Auth {
 
         return {
             status: "success",
-            message: "Mot de passe changé"
+            type: ResponseType.SUCCESS
         }
     }
 }

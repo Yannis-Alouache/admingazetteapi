@@ -14,9 +14,9 @@ exports.Pub = class Pub {
         const {
             token,
             name,
-            price,
-            priority,
-            link
+            type,
+            link, 
+            
         } = req.body
 
         const image = req.raw.files.image

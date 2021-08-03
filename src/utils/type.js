@@ -1,0 +1,23 @@
+exports.PermissionType = {
+    ADD_PERMISSION,
+    DELETE_PERMISSION,
+    GET_PERMISSION,
+    CREATE_PUB,
+    DELETE_PUB,
+    GET_PUB,
+    CHANGE_INFORMATION,
+    DELETE_USER,
+    GET_USER_INFORMATION,
+    ADD_CONTACT,
+    DELETE_CONTACT,
+    GET_CONTACT 
+} 
+
+exports.ResponseType = {
+    SUCCESS,
+    MISMATCH_FIELD,
+    USER_EXIST,
+    PASSWORD_ERROR,
+    USER_NOT_EXIST,
+    TMP_ERROR
+}

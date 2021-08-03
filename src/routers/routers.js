@@ -37,6 +37,7 @@ exports.Routers = class Routers {
         this.server.post('/api/auth/login', this.auth.login.bind(this.auth))
         this.server.post('/api/auth/forgot', this.auth.forgot.bind(this.auth))
         this.server.post('/api/auth/recovery', this.auth.recovery.bind(this.auth))
+        this.server.post('/api/auth/verify', this.auth.verify.bind(this.auth))
 
         this.server.post('/api/user/change', this.user.change.bind(this.user))
         this.server.post('/api/user/delete', this.user.delete.bind(this.user))

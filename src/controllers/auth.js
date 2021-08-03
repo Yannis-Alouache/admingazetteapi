@@ -1,12 +1,16 @@
 const jwt = require('jsonwebtoken')
 const argon2 = require('argon2')
-const {Env} = require("../env/env"); 
-const { ResponseType } = require("../utils/type")
+const {
+    Env
+} = require("../env/env");
+const {
+    ResponseType
+} = require("../utils/type")
 
 exports.Auth = class Auth {
     constructor(db, mail) {
         this.users = db.collection('users')
-        this.mail  = mail
+        this.mail = mail
         this.env = new Env()
     }
 
@@ -29,60 +33,62 @@ exports.Auth = class Auth {
         if (!email) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD 
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!firstname) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD 
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!lastname) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD 
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!password) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD 
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!enterprise) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD 
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!contacts) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD 
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!address) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD 
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!zipcode) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD 
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
-        const userExist = await this.users.findOne({ email })
+        const userExist = await this.users.findOne({
+            email
+        })
 
         if (userExist) {
             return {
@@ -114,6 +120,33 @@ exports.Auth = class Auth {
         }
     }
 
+    async verify(req, res) {
+        const {
+            token
+        } = req.body
+
+        if (!token) {
+            return {
+                status: "error",
+                type: ResponseType.MISMATCH_FIELD
+            }
+        }
+
+        try {
+            await jwt.verify(token, (await this.env.get("SECRET")))
+
+            return {
+                status: "success",
+                type: ResponseType.SUCCESS
+            }
+        } catch (e) {
+            return {
+                status: "error",
+                type: ResponseType.ERROR
+            }
+        }
+    }
+
     async login(req, res) {
         const {
             email,
@@ -123,25 +156,27 @@ exports.Auth = class Auth {
         if (!email) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD 
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!password) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD 
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
-        const user = await this.users.findOne({ email })
+        const user = await this.users.findOne({
+            email
+        })
 
         const match = await argon2.verify(user.password, password)
 
         if (!match) {
             return {
                 status: "error",
-                type: ResponseType.PASSWORD_ERROR 
+                type: ResponseType.PASSWORD_ERROR
             }
         }
 
@@ -164,16 +199,18 @@ exports.Auth = class Auth {
         if (!email) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD 
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
-        const user = await this.users.findOne({ email })
+        const user = await this.users.findOne({
+            email
+        })
 
         if (!user) {
             return {
                 status: "error",
-                type: ResponseType.USER_NOT_EXIST 
+                type: ResponseType.USER_NOT_EXIST
             }
         }
 
@@ -208,30 +245,32 @@ exports.Auth = class Auth {
         if (!tmp) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD 
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!email) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD 
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!password) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD 
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
-        const user = await this.users.findOne({ email })
+        const user = await this.users.findOne({
+            email
+        })
 
         if (tmp != user.tmp) {
             return {
                 status: "error",
-                type: ResponseType.TMP_ERROR 
+                type: ResponseType.TMP_ERROR
             }
         }
 

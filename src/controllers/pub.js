@@ -1,6 +1,10 @@
 const jwt = require('jsonwebtoken')
 const {Env} = require("../env/env");
 const fs = require('fs')
+const {
+    ResponseType,
+    PermissionType
+} = require("../utils/type")
 
 exports.Pub = class Pub {
     constructor(db, mail) {
@@ -16,50 +20,90 @@ exports.Pub = class Pub {
             name,
             type,
             link, 
-            
+            content, 
+            content_tab,
+            content_mobile,
+            category, 
+            date_start, 
+            date_fin 
         } = req.body
 
         const image = req.raw.files.image
 
+        if (!date_fin) { 
+            return {
+                status: "error", 
+                type: ResponseType.MISMATCH_FIELD
+            }
+        }
+
+        if (!date_start) {
+            return {
+                status: "error", 
+                type: ResponseType.MISMATCH_FIELD
+            }
+        }
+
+        if (!category) {
+            return {
+                status: "error", 
+                type: ResponseType.MISMATCH_FIELD
+            }
+        }
+
+        if (!content_mobile) {
+            return {
+                status: "error", 
+                type: ResponseType.MISMATCH_FIELD
+            }
+        }
+
+        if (!content_tab) {
+            return {
+                status: "error", 
+                type: ResponseType.MISMATCH_FIELD
+            }
+        }
+
+        if (!content) {
+            return {
+                status: "error", 
+                type: ResponseType.MISMATCH_FIELD
+            }
+        }
+
+        if (!type) {
+            return {
+                status: "error", 
+                type: ResponseType.MISMATCH_FIELD
+            }
+        }
+
         if (!token) {
             return {
-                status: "error",
-                message: "Merci de vous connectez !"
+                status: "error", 
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!name) {
             return {
-                status: "error",
-                message: "Merci de spécifiez le nom de la pub"
-            }
-        }
-
-        if (!price) {
-            return {
-                status: "error",
-                message: "Merci de spécifiez le prix de votre pub"
-            }
-        }
-
-        if (!priority) {
-            return {
-                status: "error",
-                message: "Merci de spécifiez la priorité de la pub"
+                status: "error", 
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!link) {
             return {
-                status: "error",
-                message: "Merci de spécifiez le lien de redirection de votre publicité"
+                status: "error", 
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!image) {
             return {
-                status: "error",
-                message: "Merci de renseignez une image"
+                status: "error", 
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
@@ -69,15 +113,20 @@ exports.Pub = class Pub {
             const me = await this.users.findOne({email: decoded.email})
 
             for (const p of me.permissions) {
-                if (p === "CREATE_PUB") {
+                if (p === PermissionType.CREATE_PUB) {
 
                     Promise.all([
                         this.pub.insertOne({
                             author: decoded.email,
                             name,
-                            price,
-                            priority,
-                            link,
+                            type,
+                            link, 
+                            content, 
+                            content_tab,
+                            content_mobile,
+                            category, 
+                            date_start, 
+                            date_fin,
                             image: image.name
                         }),
                         this.mail.send(decoded.email, "Création d'une pub", "<h1> Publicité crée </h1>"),
@@ -87,19 +136,19 @@ exports.Pub = class Pub {
 
                     return {
                         status: "success",
-                        message: "Publicité crée"
+                        type: ResponseType.SUCCESS
                     }
                 }
             }
 
             return {
                 status: "error",
-                message: "Vous n'avez pas la permission"
+                type: ResponseType.PERMISSION_ERROR
             }
         } catch (e) {
             return {
                 status: "error",
-                message: e
+                type: ResponseType.ERROR 
             }
         }
     }
@@ -113,14 +162,14 @@ exports.Pub = class Pub {
         if (!token) {
             return {
                 status: "error",
-                message: "Merci de vous connectez"
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
         if (!name) {
             return {
                 status: "error",
-                message: "Merci de spécifiez votre nom"
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
@@ -130,7 +179,7 @@ exports.Pub = class Pub {
             const me = await this.users.findOne({email: decoded.email})
 
             for (const p of me.permissions) {
-                if (p === "DELETE_PUB") {
+                if (p === PermissionType.DELETE_PUB) {
                     Promise.all([
                         this.mail.send(decoded.email, "Suppresion d'une pub", "<h1> Publicité supprimé </h1>"),
                         this.pub.deleteOne({
@@ -140,19 +189,19 @@ exports.Pub = class Pub {
 
                     return {
                         status: "success",
-                        message: "Publicité supprimé !"
+                        type: ResponseType.SUCCESS
                     }
                 }
             }
 
             return {
                 status: "error",
-                message: "Vous n'avez pas la permission"
+                type: ResponseType.PERMISSION_ERROR
             }
         } catch (e) {
             return {
                 status: "error",
-                message: e
+                type: ResponseType.ERROR
             }
         }
     }
@@ -165,7 +214,7 @@ exports.Pub = class Pub {
         if (!token) {
             return {
                 status: "error",
-                message: "Merci de vous connectez"
+                type: ResponseType.MISMATCH_FIELD
             }
         }
 
@@ -175,10 +224,11 @@ exports.Pub = class Pub {
             const me = await this.users.findOne({email: decoded.email})
 
             for (const p of me.permissions) {
-                if (p === "GET_PUB") {
+                if (p === PermissionType.GET_PUB) {
                     const pub = await this.pub.find({}).toArray()
                     return {
                         status: "success",
+                        type: ResponseType.SUCCESS, 
                         data: {
                             pub
                         }
@@ -188,12 +238,12 @@ exports.Pub = class Pub {
 
             return {
                 status: "error",
-                message: "Vous n'avez pas la permission"
+                type: ResponseType.PERMISSION_ERROR
             }
         } catch (e) {
             return {
                 status: "error",
-                message: e
+                type: ResponseType.ERROR 
             }
         }
     }

@@ -12,7 +12,6 @@ exports.Contact = class Contact {
     async add(req, res) {
         const {
             token,
-            userEmail,
             email,
             firstname,
             lastname,
@@ -21,13 +20,6 @@ exports.Contact = class Contact {
         } = req.body
 
         if (!token) {
-            return {
-                status: "error",
-                type: ResponseType.MISMATCH_FIELD
-            }
-        }
-
-        if (!userEmail) {
             return {
                 status: "error",
                 type: ResponseType.MISMATCH_FIELD

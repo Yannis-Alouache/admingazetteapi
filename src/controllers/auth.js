@@ -171,6 +171,13 @@ exports.Auth = class Auth {
             email
         })
 
+        if (!user) {
+            return {
+                status: "error",
+                type: ResponseType.USER_NOT_EXIST
+            }
+        }
+
         const match = await argon2.verify(user.password, password)
 
         if (!match) {

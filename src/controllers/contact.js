@@ -169,7 +169,7 @@ exports.Contact = class Contact {
 
                 for (const p of user.permissions) {
                     if (p === PermissionType.DELETE_CONTACT) {
-                        user.contacts = user.contacts.filter(e => e !== contact)
+                        user.contacts = user.contacts.filter(e => e.tel !== contact.tel)
                         Promise.all([
                             this.users.updateOne({
                                 "email": decoded.email
@@ -199,7 +199,7 @@ exports.Contact = class Contact {
 
                 for (const p of me.permissions) {
                     if (p === PermissionType.DELETE_CONTACT) {
-                        user.contacts = user.contacts.filter(e => e !== contact)
+                        user.contacts = user.contacts.filter(e => e.tel !== contact.tel)
                         Promise.all([
                             this.users.updateOne({
                                 "email": email

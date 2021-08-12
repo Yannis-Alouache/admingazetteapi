@@ -1,6 +1,7 @@
 const { Env } = require('../env/env');
 const { ResponseType, PermissionType } = require('../utils/type')
 const jwt = require('jsonwebtoken')
+const { uuid } = require('uuid');
 
 exports.Imo = class Imo {
     constructor (db, mail) {
@@ -151,7 +152,8 @@ exports.Imo = class Imo {
                             begindate,
                             enddate,
                             price,
-                            image: image.name
+                            image: image.name,
+                            id: uuid.v4()
                         }),
                         this.mail.send(decoded.email, "Création d'une annonce Immobilière", "<h1> Annonce Crée </h1>"),
                         fs.writeFile(`${__dirname}/uploads/${image.name}`, image.data)
@@ -175,6 +177,58 @@ exports.Imo = class Imo {
                 type: ResponseType.ERROR
             }
         }
+    }
 
+    async delete(req, res) {
+        const {
+            token,
+            id
+        } = req.body
+
+        if (!token) {
+            return {
+                status: "error",
+                type: ResponseType.MISMATCH_FIELD
+            }
+        }
+
+        if (!id) {
+            return {
+                status: "error",
+                type: ResponseType.MISMATCH_FIELD
+            }
+        }
+
+        try {
+            const decoded = await jwt.verify(token, (await this.env.get("SECRET")))
+
+            const me = await this.users.findOne({email: decoded.email})
+
+            for (const p of me.permissions) {
+                if (p === PermissionType.DELETE_IMO) {
+                    Promise.all([
+                        this.mail.send(decoded.email, "Suppresion d'une annonce", "<h1> Annonce supprimé </h1>"),
+                        this.imo.deleteOne({
+                            id
+                        })
+                    ])
+
+                    return {
+                        status: "success",
+                        type: ResponseType.SUCCESS
+                    }
+                }
+            }
+
+            return {
+                status: "error",
+                type: ResponseType.PERMISSION_ERROR
+            }
+        } catch (e) {
+            return {
+                status: "error",
+                type: ResponseType.ERROR
+            }
+        }
     }
 }

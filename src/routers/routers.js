@@ -3,6 +3,7 @@ const {Contact} = require("../controllers/contact");
 const {Permission} = require("../controllers/permission");
 const {Pub} = require("../controllers/pub");
 const {User} = require("../controllers/user");
+const { Imo } = require("../controllers/imo")
 const {
     Env
 } = require('../env/env')
@@ -30,6 +31,7 @@ exports.Routers = class Routers {
         this.perm    = new Permission(db, mail)
         this.contact = new Contact(db, mail)
         this.pub     = new Pub(db, mail)
+        this.imo     = new Imo(db, mail) 
     }
 
     handle() {
@@ -54,6 +56,8 @@ exports.Routers = class Routers {
         this.server.post('/api/pub/create', this.pub.create.bind(this.pub))
         this.server.post('/api/pub/delete', this.pub.delete.bind(this.pub))
         this.server.post('/api/pub/get', this.pub.get.bind(this.pub))
+
+        this.server.post('/api/imo/create', this.imo.create.bind(this.imo))
     }
 
     listen() {

@@ -58,6 +58,8 @@ exports.Routers = class Routers {
         this.server.post('/api/pub/get', this.pub.get.bind(this.pub))
 
         this.server.post('/api/imo/create', this.imo.create.bind(this.imo))
+        this.server.post('/api/imo/delete', this.imo.delete.bind(this.imo))
+        this.server.post('/api/imo/get', this.imo.get.bind(this.imo))
     }
 
     listen() {

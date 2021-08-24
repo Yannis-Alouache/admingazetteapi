@@ -1,7 +1,6 @@
 const { Env } = require('../env/env');
 const { ResponseType, PermissionType } = require('../utils/type')
 const jwt = require('jsonwebtoken')
-const { v4: uuidv4 } = require('uuid');
 const fs = require('fs')
 
 exports.Imo = class Imo {
@@ -30,14 +29,16 @@ exports.Imo = class Imo {
         if (!req.raw.files) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD
+                type: ResponseType.MISMATCH_FIELD,
+                message: "file"
             }
         }
 
         if (!req.raw.files.image.mimetype.includes("image")) {
             return {
                 status: "error",
-                type: ResponseType.NOT_IMG
+                type: ResponseType.NOT_IMG,
+                message: "img"
             }
         }
 
@@ -46,91 +47,104 @@ exports.Imo = class Imo {
         if (!token) {
             return {
                 status: "error",
-                type: ResponseType.TOKEN_MISSING
+                type: ResponseType.TOKEN_MISSING,
+                message: "token"
             }
         }
 
         if (!name) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD
+                type: ResponseType.MISMATCH_FIELD,
+                message: "name"
             }
         }
 
         if (!link) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD
+                type: ResponseType.MISMATCH_FIELD,
+                message: "link"
             }
         }
 
         if (!city) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD
+                type: ResponseType.MISMATCH_FIELD,
+                message: "city",
             }
         }
 
         if (!roomnb) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD
+                type: ResponseType.MISMATCH_FIELD,
+                message: "roomnb"
             }
         }
 
         if (!size) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD
+                type: ResponseType.MISMATCH_FIELD,
+                message: "size"
             }
         }
 
         if (!name) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD
+                type: ResponseType.MISMATCH_FIELD,
+                message: "name"
             }
         }
 
         if (!type) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD
+                type: ResponseType.MISMATCH_FIELD,
+                message: "type"
             }
         }
 
         if (!description) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD
+                type: ResponseType.MISMATCH_FIELD,
+                message: "descritption"
             }
         }
 
         if (!begindate) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD
+                type: ResponseType.MISMATCH_FIELD,
+                message: "beginDate"
             }
         }
 
         if (!enddate) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD
+                type: ResponseType.MISMATCH_FIELD,
+                message: "enddate"
             }
         }
 
         if (!price) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD
+                type: ResponseType.MISMATCH_FIELD,
+                message: "price"
             }
         }
 
         if (!image) {
             return {
                 status: "error",
-                type: ResponseType.MISMATCH_FIELD
+                type: ResponseType.MISMATCH_FIELD,
+                message: "image"
             }
         }
 
@@ -154,7 +168,6 @@ exports.Imo = class Imo {
                             enddate,
                             price,
                             image: image.name,
-                            id: uuidv4()
                         }),
                         this.mail.send(decoded.email, "Création d'une annonce Immobilière", "<h1> Annonce Crée </h1>"),
                         fs.writeFile(`${__dirname}/../uploads/${image.name}`, image.data, (e) => {
@@ -238,6 +251,7 @@ exports.Imo = class Imo {
     async get(req, res) {
         const {
             token,
+            id, /// Optional Used to get specific imo
         } = req.body
 
         if (!token) {
@@ -254,7 +268,13 @@ exports.Imo = class Imo {
 
             for (const p of me.permissions) {
                 if (p === PermissionType.GET_IMO) {
-                    const imo = await this.imo.find({}).toArray()
+                    let imo = null;
+                    if (id) {
+                        imo = await this.imo.findOne({
+                            _id
+                        }).toArray();
+                    }
+                    imo = await this.imo.find({}).toArray();
                     return {
                         status: "success",
                         type: ResponseType.SUCCESS, 

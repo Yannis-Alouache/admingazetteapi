@@ -130,7 +130,8 @@ exports.Pub = class Pub {
                             image: image.name
                         }),
                         this.mail.send(decoded.email, "Création d'une pub", "<h1> Publicité crée </h1>"),
-                        fs.writeFile(`${__dirname}/uploads/${image.name}`, image.data, (e) => {
+                        fs.writeFile(`${__dirname}/../uploads/${image.name}`, image.data, (e) => {
+                            console.log(e)
                         })
                     ])
 

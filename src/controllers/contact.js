@@ -13,6 +13,7 @@ exports.Contact = class Contact {
         const {
             token,
             email,
+            contactmail,
             firstname,
             lastname,
             role,
@@ -27,6 +28,13 @@ exports.Contact = class Contact {
         }
 
         if (!email) {
+            return {
+                status: "error",
+                type: ResponseType.MISMATCH_FIELD
+            }
+        }
+
+        if (!contactmail) {
             return {
                 status: "error",
                 type: ResponseType.MISMATCH_FIELD
@@ -69,7 +77,7 @@ exports.Contact = class Contact {
 
                 for (const p of user.permissions) {
                     if (p === PermissionType.ADD_CONTACT) {
-                        user.contacts.push({email, firstname, lastname, role, tel})
+                        user.contacts.push({contactmail, firstname, lastname, role, tel})
 
                         Promise.all([
                             this.users.updateOne({
@@ -100,7 +108,7 @@ exports.Contact = class Contact {
 
                 for (const p of me.permissions) {
                     if (p === PermissionType.ADD_CONTACT) {
-                        user.contacts.push({email, firstname, lastname, role, tel})
+                        user.contacts.push({contactmail, firstname, lastname, role, tel})
 
                         Promise.all([
                             this.users.updateOne({
